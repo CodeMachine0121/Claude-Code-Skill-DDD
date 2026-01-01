@@ -101,16 +101,14 @@ ddd-agent/
 ├── pyproject.toml
 ├── README.md
 ├── LICENSE
-├── .claude/
-│   └── skills/
-│       └── ddd/
-│           ├── strategic-design/
-│           │   └── SKILL.md
-│           └── event-storming/
-│               └── SKILL.md
 ├── .github/
 └── src/
     └── ddd_skill/
         ├── __init__.py
-        └── cli.py
+        ├── cli.py
+        └── skills/
+            ├── strategic-design/
+            │   └── SKILL.md
+            └── event-storming/
+                └── SKILL.md
 ```

@@ -5,9 +5,15 @@ import shutil
 import sys
 from pathlib import Path
 
-# Get project root directory (where .claude/skills/ddd is located)
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-SOURCE_SKILLS_DIR = PROJECT_ROOT / ".claude" / "skills" / "ddd"
+# For Python 3.9+, use importlib.resources
+try:
+    from importlib.resources import files
+except ImportError:
+    # Fallback for Python < 3.9
+    from importlib_resources import files  # type: ignore
+
+# Get skills directory from package resources
+SOURCE_SKILLS_DIR = Path(str(files("ddd_skill").joinpath("skills")))
 
 GLOBAL_SKILL_DIR = Path.home() / ".claude" / "skills" / "ddd"
 LOCAL_SKILL_DIR = Path.cwd() / ".claude" / "skills" / "ddd"
