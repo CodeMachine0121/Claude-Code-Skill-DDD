@@ -13,7 +13,7 @@ jobs:
     name: Upload release to PyPI
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      name: any
       url: https://pypi.org/p/Claude-Code-Skill-DDD
     permissions:
       id-token: write
