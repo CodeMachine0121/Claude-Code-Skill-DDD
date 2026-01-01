@@ -4,16 +4,30 @@
 
 ## 安裝
 
-使用 `uvx` 一鍵安裝：
+使用 `uvx` 安裝：
 
 ```bash
-uvx ddd-skill install
+# 互動式選擇（會提示選擇全域或本地）
+uvx --from Claude-Code-Skill-DDD ddd-skill install
+
+# 安裝到全域 (~/.claude/skills/ddd/)，所有專案皆可使用
+uvx --from Claude-Code-Skill-DDD ddd-skill install -g
+
+# 安裝到當前專案 (./.claude/skills/ddd/)，僅限此專案使用
+uvx --from Claude-Code-Skill-DDD ddd-skill install -l
 ```
 
 移除：
 
 ```bash
-uvx ddd-skill uninstall
+# 互動式選擇
+uvx --from Claude-Code-Skill-DDD ddd-skill uninstall
+
+# 移除全域安裝
+uvx --from Claude-Code-Skill-DDD ddd-skill uninstall -g
+
+# 移除本地安裝
+uvx --from Claude-Code-Skill-DDD ddd-skill uninstall -l
 ```
 
 ## 使用方式

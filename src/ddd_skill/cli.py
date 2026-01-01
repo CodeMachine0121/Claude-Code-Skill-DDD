@@ -1,9 +1,12 @@
 """CLI for installing DDD skill to Claude Code."""
 
+import argparse
 import shutil
 import sys
 from pathlib import Path
 
+GLOBAL_SKILL_DIR = Path.home() / ".claude" / "skills" / "ddd"
+LOCAL_SKILL_DIR = Path.cwd() / ".claude" / "skills" / "ddd"
 
 SKILL_CONTENT = '''\
 ---
@@ -160,52 +163,135 @@ ddd-docs/
 '''
 
 
-def get_skill_dir() -> Path:
-    """Get the Claude Code skills directory."""
-    return Path.home() / ".claude" / "skills" / "ddd"
+def prompt_location() -> str:
+    """Prompt user to choose installation location."""
+    print("Where would you like to install the DDD skill?")
+    print("")
+    print("  [1] Global   (~/.claude/skills/ddd/)")
+    print("      Available in all projects")
+    print("")
+    print("  [2] Local    (./.claude/skills/ddd/)")
+    print("      Only available in this project")
+    print("")
+
+    while True:
+        choice = input("Enter choice [1/2]: ").strip()
+        if choice == "1":
+            return "global"
+        elif choice == "2":
+            return "local"
+        else:
+            print("Invalid choice. Please enter 1 or 2.")
 
 
-def install() -> None:
+def get_skill_dir(location: str) -> Path:
+    """Get the Claude Code skills directory based on location."""
+    if location == "global":
+        return GLOBAL_SKILL_DIR
+    else:
+        return LOCAL_SKILL_DIR
+
+
+def install(location: str | None = None) -> None:
     """Install the DDD skill to Claude Code."""
-    skill_dir = get_skill_dir()
+    if location is None:
+        location = prompt_location()
+
+    skill_dir = get_skill_dir(location)
     skill_file = skill_dir / "SKILL.md"
 
     skill_dir.mkdir(parents=True, exist_ok=True)
     skill_file.write_text(SKILL_CONTENT, encoding="utf-8")
 
-    print(f"DDD skill installed to: {skill_file}")
+    location_label = "globally" if location == "global" else "locally"
+    print(f"DDD skill installed {location_label}: {skill_file}")
 
 
-def uninstall() -> None:
+def uninstall(location: str | None = None) -> None:
     """Uninstall the DDD skill from Claude Code."""
-    skill_dir = get_skill_dir()
+    if location is None:
+        location = prompt_location()
+
+    skill_dir = get_skill_dir(location)
 
     if skill_dir.exists():
         shutil.rmtree(skill_dir)
-        print(f"DDD skill uninstalled from: {skill_dir}")
+        location_label = "global" if location == "global" else "local"
+        print(f"DDD skill ({location_label}) uninstalled from: {skill_dir}")
     else:
-        print("DDD skill is not installed.")
+        print("DDD skill is not installed at this location.")
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create argument parser."""
+    parser = argparse.ArgumentParser(
+        prog="ddd-skill",
+        description="Install or uninstall the DDD skill for Claude Code",
+    )
+
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # Install command
+    install_parser = subparsers.add_parser(
+        "install",
+        help="Install DDD skill",
+    )
+    install_group = install_parser.add_mutually_exclusive_group()
+    install_group.add_argument(
+        "-g", "--global",
+        action="store_true",
+        dest="global_install",
+        help="Install globally to ~/.claude/skills/ddd/",
+    )
+    install_group.add_argument(
+        "-l", "--local",
+        action="store_true",
+        dest="local_install",
+        help="Install locally to ./.claude/skills/ddd/",
+    )
+
+    # Uninstall command
+    uninstall_parser = subparsers.add_parser(
+        "uninstall",
+        help="Uninstall DDD skill",
+    )
+    uninstall_group = uninstall_parser.add_mutually_exclusive_group()
+    uninstall_group.add_argument(
+        "-g", "--global",
+        action="store_true",
+        dest="global_install",
+        help="Uninstall from ~/.claude/skills/ddd/",
+    )
+    uninstall_group.add_argument(
+        "-l", "--local",
+        action="store_true",
+        dest="local_install",
+        help="Uninstall from ./.claude/skills/ddd/",
+    )
+
+    return parser
 
 
 def main() -> None:
     """CLI entry point."""
-    if len(sys.argv) < 2:
-        print("Usage: ddd-skill <command>")
-        print("")
-        print("Commands:")
-        print("  install    Install DDD skill to ~/.claude/skills/ddd/")
-        print("  uninstall  Remove DDD skill")
+    parser = create_parser()
+    args = parser.parse_args()
+
+    if args.command is None:
+        parser.print_help()
         sys.exit(1)
 
-    command = sys.argv[1]
+    # Determine location
+    location: str | None = None
+    if getattr(args, "global_install", False):
+        location = "global"
+    elif getattr(args, "local_install", False):
+        location = "local"
 
-    if command == "install":
-        install()
-    elif command == "uninstall":
-        uninstall()
-    else:
-        print(f"Unknown command: {command}")
-        sys.exit(1)
+    if args.command == "install":
+        install(location)
+    elif args.command == "uninstall":
+        uninstall(location)
 
 
 if __name__ == "__main__":
