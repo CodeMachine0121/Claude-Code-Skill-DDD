@@ -1,0 +1,17 @@
+[project]
+name = "ddd-skill"
+version = "0.1.0"
+description = "DDD Expert skill for Claude Code - guides users through Domain-Driven Design"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+ddd-skill = "ddd_skill.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ddd_skill"]
