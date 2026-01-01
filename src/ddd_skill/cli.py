@@ -1,171 +1,35 @@
-"""CLI for installing DDD skill to Claude Code."""
+"""CLI for installing DDD skills to Claude Code."""
 
 import argparse
 import shutil
 import sys
 from pathlib import Path
 
+# Get project root directory (where .claude/skills/ddd is located)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+SOURCE_SKILLS_DIR = PROJECT_ROOT / ".claude" / "skills" / "ddd"
+
 GLOBAL_SKILL_DIR = Path.home() / ".claude" / "skills" / "ddd"
 LOCAL_SKILL_DIR = Path.cwd() / ".claude" / "skills" / "ddd"
 
-SKILL_CONTENT = '''\
----
-name: ddd-expert
-description: DDD 專家，引導使用者完成 Domain-Driven Design 專案設計。透過對話式問答收集領域資訊，最終生成 Markdown 設計文件。
----
 
-# DDD 專案建置引導
+def get_available_skills() -> list[Path]:
+    """Get list of available skill directories from the project."""
+    if not SOURCE_SKILLS_DIR.exists():
+        return []
 
-你是一位 Domain-Driven Design 專家，負責引導用戶完成 DDD 專案設計。透過對話式問答收集領域資訊，最終直接生成 Markdown 設計文件。
+    # Find all subdirectories that contain SKILL.md
+    skills = []
+    for item in SOURCE_SKILLS_DIR.iterdir():
+        if item.is_dir() and (item / "SKILL.md").exists():
+            skills.append(item)
 
-## 引導流程
-
-### Phase 1: 領域探索
-目標：了解業務背景與核心問題
-
-收集：
-- 專案名稱與目的
-- 業務背景與領域
-- 核心問題
-
-引導方式：以開放式問題開始，根據回答追問細節。
-
-### Phase 2: Bounded Context 識別
-目標：劃分子領域邊界
-
-收集：
-- 子領域名稱與職責
-- Context 之間的關係
-
-引導方式：根據 Phase 1 資訊建議可能的劃分，與用戶確認。
-
-### Phase 3: Aggregate 設計
-目標：定義每個 Context 中的聚合
-
-收集：
-- Aggregate 名稱與職責
-- 業務規則 (Invariants)
-
-### Phase 4: Entity / Value Object 細節
-目標：設計 Aggregate 的組成
-
-收集：
-- 聚合根 Entity（名稱、識別欄位、屬性）
-- 其他 Entity
-- Value Objects
-
-引導方式：幫助用戶區分 Entity 與 Value Object。
-
-### Phase 5: 通用語言 (Ubiquitous Language)
-目標：建立領域術語表
-
-收集：
-- 領域專有術語及其定義
-
----
-
-## 輸出文件
-
-完成所有階段後，直接生成以下 Markdown 文件結構：
-
-```
-ddd-docs/
-├── README.md                 # 專案概覽
-├── ubiquitous-language.md    # 通用語言術語表
-└── contexts/
-    └── {context-name}/
-        ├── overview.md       # Context 概覽
-        └── aggregates/
-            └── {aggregate}.md
-```
-
-### README.md 模板
-
-```markdown
-# {專案名稱}
-
-## 專案概述
-{專案描述}
-
-## 業務背景
-{業務背景}
-
-## 核心問題
-- {問題1}
-- {問題2}
-
-## Bounded Contexts
-- [{Context名稱}](contexts/{context-slug}/overview.md)
-
-## 文件結構
-{目錄樹}
-```
-
-### ubiquitous-language.md 模板
-
-```markdown
-# 通用語言 (Ubiquitous Language)
-
-| 術語 | 定義 |
-|------|------|
-| {術語} | {定義} |
-```
-
-### Context overview.md 模板
-
-```markdown
-# {Context 名稱}
-
-## 概述
-{Context 描述}
-
-## Aggregates
-- [{Aggregate名稱}](aggregates/{aggregate-slug}.md)
-```
-
-### Aggregate 模板
-
-```markdown
-# {Aggregate 名稱}
-
-## 概述
-{描述}
-
-## 業務規則 (Invariants)
-- {規則1}
-- {規則2}
-
-## 聚合根: {Entity 名稱}
-{描述}
-
-- **識別欄位**: `{identifier}`
-- **屬性**: {屬性列表}
-
-### Value Objects
-- **{VO名稱}**: {描述}
-  - 屬性: {屬性列表}
-
-## 其他 Entities
-### {Entity 名稱}
-- **識別欄位**: `{identifier}`
-- **屬性**: {屬性列表}
-```
-
----
-
-## 互動原則
-
-1. **循序漸進**：一次專注一個階段
-2. **主動建議**：根據資訊提出設計建議
-3. **確認理解**：適時總結，確認正確
-4. **靈活調整**：允許回到前面修改
-5. **完成後輸出**：使用 Write 工具直接生成所有 Markdown 文件
-'''
+    return sorted(skills)
 
 
 def prompt_location() -> str:
     """Prompt user to choose installation location."""
-    print("Where would you like to install the DDD skill?")
+    print("Where would you like to install the DDD skills?")
     print("")
     print("  [1] Global   (~/.claude/skills/ddd/)")
     print("      Available in all projects")
@@ -193,40 +57,95 @@ def get_skill_dir(location: str) -> Path:
 
 
 def install(location: str | None = None) -> None:
-    """Install the DDD skill to Claude Code."""
+    """Install all DDD skills to Claude Code."""
     if location is None:
         location = prompt_location()
 
-    skill_dir = get_skill_dir(location)
-    skill_file = skill_dir / "SKILL.md"
+    # Get available skills from the project
+    available_skills = get_available_skills()
 
-    skill_dir.mkdir(parents=True, exist_ok=True)
-    skill_file.write_text(SKILL_CONTENT, encoding="utf-8")
+    if not available_skills:
+        print("Error: No skills found in the project.")
+        print(f"Expected location: {SOURCE_SKILLS_DIR}")
+        sys.exit(1)
+
+    target_dir = get_skill_dir(location)
+
+    # Check if source and target are the same
+    if SOURCE_SKILLS_DIR.resolve() == target_dir.resolve():
+        print(f"\nSkills are already installed at: {target_dir}")
+        print("=" * 60)
+        for skill_path in available_skills:
+            print(f"  ✓ {skill_path.name} (already present)")
+        print("=" * 60)
+        print(f"\n{len(available_skills)} skill(s) already available!")
+        return
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"\nInstalling DDD skills to: {target_dir}")
+    print("=" * 60)
+
+    installed_skills = []
+
+    for skill_path in available_skills:
+        skill_name = skill_path.name
+        target_skill_dir = target_dir / skill_name
+
+        # Copy the skill directory
+        if target_skill_dir.exists():
+            shutil.rmtree(target_skill_dir)
+
+        shutil.copytree(skill_path, target_skill_dir)
+
+        # Read skill description from SKILL.md
+        skill_file = target_skill_dir / "SKILL.md"
+        description = ""
+        if skill_file.exists():
+            content = skill_file.read_text(encoding="utf-8")
+            # Extract description from frontmatter
+            for line in content.split("\n"):
+                if line.startswith("description:"):
+                    description = line.replace("description:", "").strip()
+                    break
+
+        installed_skills.append((skill_name, description))
+        print(f"  ✓ {skill_name}")
+        if description:
+            print(f"    {description}")
 
     location_label = "globally" if location == "global" else "locally"
-    print(f"DDD skill installed {location_label}: {skill_file}")
+    print("=" * 60)
+    print(f"\nSuccessfully installed {len(installed_skills)} skill(s) {location_label}!")
+    print("\nInstalled skills:")
+    for skill_name, description in installed_skills:
+        print(f"  - {skill_name}")
 
 
 def uninstall(location: str | None = None) -> None:
-    """Uninstall the DDD skill from Claude Code."""
+    """Uninstall all DDD skills from Claude Code."""
     if location is None:
         location = prompt_location()
 
     skill_dir = get_skill_dir(location)
 
     if skill_dir.exists():
+        # Count skills before removal
+        skill_count = sum(1 for item in skill_dir.iterdir() if item.is_dir())
+
         shutil.rmtree(skill_dir)
         location_label = "global" if location == "global" else "local"
-        print(f"DDD skill ({location_label}) uninstalled from: {skill_dir}")
+        print(f"DDD skills ({location_label}) uninstalled from: {skill_dir}")
+        print(f"Removed {skill_count} skill(s).")
     else:
-        print("DDD skill is not installed at this location.")
+        print("DDD skills are not installed at this location.")
 
 
 def create_parser() -> argparse.ArgumentParser:
     """Create argument parser."""
     parser = argparse.ArgumentParser(
         prog="ddd-skill",
-        description="Install or uninstall the DDD skill for Claude Code",
+        description="Install or uninstall DDD skills for Claude Code",
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -234,7 +153,7 @@ def create_parser() -> argparse.ArgumentParser:
     # Install command
     install_parser = subparsers.add_parser(
         "install",
-        help="Install DDD skill",
+        help="Install all DDD skills",
     )
     install_group = install_parser.add_mutually_exclusive_group()
     install_group.add_argument(
@@ -253,7 +172,7 @@ def create_parser() -> argparse.ArgumentParser:
     # Uninstall command
     uninstall_parser = subparsers.add_parser(
         "uninstall",
-        help="Uninstall DDD skill",
+        help="Uninstall all DDD skills",
     )
     uninstall_group = uninstall_parser.add_mutually_exclusive_group()
     uninstall_group.add_argument(

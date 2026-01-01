@@ -1,6 +1,6 @@
 ---
-name: ddd-expert
-description: DDD 專家，引導使用者完成 Domain-Driven Design 專案設計。透過對話式問答收集領域資訊，最終生成 Markdown 設計文件。
+name: strategic-design
+description: DDD 戰略設計專家，引導使用者完成 Bounded Context 識別與 Aggregate 切分。透過對話式問答收集領域資訊，最終生成 Markdown 設計文件。
 ---
 
 # DDD 專案建置引導
