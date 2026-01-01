@@ -172,7 +172,7 @@ ddd-docs/
 
 ## Domain Events 清單
 
-以下事件需進一步定義，請使用 `/ddd:domain-event` 進行細化：
+以下事件已在此次 Event Storming 中識別：
 
 - {Event 1}
 - {Event 2}
@@ -185,5 +185,5 @@ ddd-docs/
 1. **視覺化思考**：用表格和流程圖幫助用戶理解
 2. **不求完美**：先求廣度，再求深度
 3. **標記疑問**：遇到不確定的地方標記為 Hotspot
-4. **連結其他 Skill**：完成後提示用戶可用 `/ddd:domain-event` 細化事件定義
+4. **識別 Domain Events**：在 Event Storming 過程中完整識別並記錄所有 Domain Events
 5. **完成後輸出**：使用 Write 工具直接生成所有 Markdown 文件
