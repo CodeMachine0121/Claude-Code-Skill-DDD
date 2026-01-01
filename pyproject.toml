@@ -1,5 +1,5 @@
 [project]
-name = "ddd-skill"
+name = "Claude-Code-Skill-DDD"
 version = "0.1.0"
 description = "DDD Expert skill for Claude Code - guides users through Domain-Driven Design"
 readme = "README.md"
