@@ -72,54 +72,27 @@ def install(location: str | None = None) -> None:
     available_skills = get_available_skills()
 
     if not available_skills:
-        print("\n❌ 錯誤：專案中找不到任何 skills")
-        print(f"預期位置：{SOURCE_SKILLS_DIR}")
+        print(f"\nError: No skills found at {SOURCE_SKILLS_DIR}")
         sys.exit(1)
 
     target_dir = get_skill_dir(location)
-    location_label = "全域" if location == "global" else "當前專案"
 
     # Check if source and target are the same
     if SOURCE_SKILLS_DIR.resolve() == target_dir.resolve():
-        print(f"\n✅ Skills 已經安裝在目標位置：{target_dir}")
-        print("\n" + "=" * 70)
-        print("已安裝的 Skills：")
+        print(f"\nSkills already at: {target_dir}")
         for skill_path in available_skills:
-            skill_file = skill_path / "SKILL.md"
-            description = ""
-            if skill_file.exists():
-                content = skill_file.read_text(encoding="utf-8")
-                for line in content.split("\n"):
-                    if line.startswith("description:"):
-                        description = line.replace("description:", "").strip()
-                        break
             print(f"  ✓ {skill_path.name}")
-            if description:
-                print(f"    {description}")
-        print("=" * 70)
-        print(f"\n共 {len(available_skills)} 個 skill(s) 可用！")
+        print(f"\n{len(available_skills)} skill(s) available")
         return
 
-    # Step 2: Start installation
-    print(f"\n🚀 開始安裝 DDD Skills 到{location_label}...")
-    print(f"目標位置：{target_dir}")
+    # Start installation
+    print(f"\nInstalling to {target_dir}\n")
 
-    # Check if directory needs to be created
-    if not target_dir.exists():
-        print(f"\n📁 建立目錄：{target_dir}")
-        target_dir.mkdir(parents=True, exist_ok=True)
-        print("   ✓ 目錄建立完成")
-    else:
-        target_dir.mkdir(parents=True, exist_ok=True)
+    # Create directory if needed
+    target_dir.mkdir(parents=True, exist_ok=True)
 
-    print("\n" + "=" * 70)
-    print("安裝進度：")
-    print()
-
-    installed_skills = []
-
-    # Step 3: Install each skill
-    for idx, skill_path in enumerate(available_skills, 1):
+    # Install each skill
+    for skill_path in available_skills:
         skill_name = skill_path.name
         target_skill_dir = target_dir / skill_name
 
@@ -128,36 +101,10 @@ def install(location: str | None = None) -> None:
             shutil.rmtree(target_skill_dir)
 
         shutil.copytree(skill_path, target_skill_dir)
+        print(f"  ✓ {skill_name}")
 
-        # Read skill description from SKILL.md
-        skill_file = target_skill_dir / "SKILL.md"
-        description = ""
-        if skill_file.exists():
-            content = skill_file.read_text(encoding="utf-8")
-            # Extract description from frontmatter
-            for line in content.split("\n"):
-                if line.startswith("description:"):
-                    description = line.replace("description:", "").strip()
-                    break
-
-        installed_skills.append((skill_name, description))
-        print(f"  [{idx}/{len(available_skills)}] ✓ {skill_name}")
-        if description:
-            print(f"      {description}")
-        print()
-
-    # Step 4: Show installation summary
-    print("=" * 70)
-    print(f"\n✅ 安裝完成！")
-    print(f"\n已成功安裝 {len(installed_skills)} 個 skill(s) 到{location_label}")
-    print(f"安裝位置：{target_dir}")
-    print("\n已安裝的 Skills：")
-    for skill_name, description in installed_skills:
-        print(f"  • {skill_name}")
-        if description:
-            print(f"    {description}")
-    print("\n" + "=" * 70)
-    print("\n💡 使用方式：在 Claude Code 中輸入 /{skill_name} 即可使用")
+    # Show summary
+    print(f"\nInstalled {len(available_skills)} skill(s). Use /{{skill_name}} to run.")
 
 
 def uninstall(location: str | None = None) -> None:
@@ -171,14 +118,12 @@ def uninstall(location: str | None = None) -> None:
     available_skills = get_available_skills()
 
     if not available_skills:
-        print("\n❌ 錯誤：專案中找不到任何 skills")
+        print("\nError: No skills found in package")
         sys.exit(1)
 
     removed_count = 0
-    location_label = "全域" if location == "global" else "當前專案"
 
-    print(f"\n🗑️  開始移除{location_label} DDD Skills...")
-    print()
+    print(f"\nUninstalling from {skill_dir}\n")
 
     # Remove each DDD skill
     for skill_path in available_skills:
@@ -187,16 +132,13 @@ def uninstall(location: str | None = None) -> None:
 
         if target_skill_dir.exists():
             shutil.rmtree(target_skill_dir)
-            print(f"  ✓ 已移除: {skill_name}")
+            print(f"  ✓ {skill_name}")
             removed_count += 1
-        else:
-            print(f"  - 未安裝: {skill_name}")
 
-    print()
     if removed_count > 0:
-        print(f"✅ 成功移除 {removed_count} 個 skill(s)")
+        print(f"\nRemoved {removed_count} skill(s)")
     else:
-        print("ℹ️  沒有找到已安裝的 DDD skills")
+        print("\nNo DDD skills were installed")
 
 
 def create_parser() -> argparse.ArgumentParser:
