@@ -15,8 +15,8 @@ except ImportError:
 # Get skills directory from package resources
 SOURCE_SKILLS_DIR = Path(str(files("ddd_skill").joinpath("skills")))
 
-GLOBAL_SKILL_DIR = Path.home() / ".claude" / "skills" / "ddd"
-LOCAL_SKILL_DIR = Path.cwd() / ".claude" / "skills" / "ddd"
+GLOBAL_SKILL_DIR = Path.home() / ".claude" / "skills"
+LOCAL_SKILL_DIR = Path.cwd() / ".claude" / "skills"
 
 
 def get_available_skills() -> list[Path]:
@@ -37,10 +37,10 @@ def prompt_location() -> str:
     """Prompt user to choose installation location."""
     print("Where would you like to install the DDD skills?")
     print("")
-    print("  [1] Global   (~/.claude/skills/ddd/)")
+    print("  [1] Global   (~/.claude/skills/)")
     print("      Available in all projects")
     print("")
-    print("  [2] Local    (./.claude/skills/ddd/)")
+    print("  [2] Local    (./.claude/skills/)")
     print("      Only available in this project")
     print("")
 
@@ -167,16 +167,36 @@ def uninstall(location: str | None = None) -> None:
 
     skill_dir = get_skill_dir(location)
 
-    if skill_dir.exists():
-        # Count skills before removal
-        skill_count = sum(1 for item in skill_dir.iterdir() if item.is_dir())
+    # Get available skills from the package
+    available_skills = get_available_skills()
 
-        shutil.rmtree(skill_dir)
-        location_label = "global" if location == "global" else "local"
-        print(f"DDD skills ({location_label}) uninstalled from: {skill_dir}")
-        print(f"Removed {skill_count} skill(s).")
+    if not available_skills:
+        print("\n❌ 錯誤：專案中找不到任何 skills")
+        sys.exit(1)
+
+    removed_count = 0
+    location_label = "全域" if location == "global" else "當前專案"
+
+    print(f"\n🗑️  開始移除{location_label} DDD Skills...")
+    print()
+
+    # Remove each DDD skill
+    for skill_path in available_skills:
+        skill_name = skill_path.name
+        target_skill_dir = skill_dir / skill_name
+
+        if target_skill_dir.exists():
+            shutil.rmtree(target_skill_dir)
+            print(f"  ✓ 已移除: {skill_name}")
+            removed_count += 1
+        else:
+            print(f"  - 未安裝: {skill_name}")
+
+    print()
+    if removed_count > 0:
+        print(f"✅ 成功移除 {removed_count} 個 skill(s)")
     else:
-        print("DDD skills are not installed at this location.")
+        print("ℹ️  沒有找到已安裝的 DDD skills")
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -198,13 +218,13 @@ def create_parser() -> argparse.ArgumentParser:
         "-g", "--global",
         action="store_true",
         dest="global_install",
-        help="Install globally to ~/.claude/skills/ddd/",
+        help="Install globally to ~/.claude/skills/",
     )
     install_group.add_argument(
         "-l", "--local",
         action="store_true",
         dest="local_install",
-        help="Install locally to ./.claude/skills/ddd/",
+        help="Install locally to ./.claude/skills/",
     )
 
     # Uninstall command
@@ -217,13 +237,13 @@ def create_parser() -> argparse.ArgumentParser:
         "-g", "--global",
         action="store_true",
         dest="global_install",
-        help="Uninstall from ~/.claude/skills/ddd/",
+        help="Uninstall from ~/.claude/skills/",
     )
     uninstall_group.add_argument(
         "-l", "--local",
         action="store_true",
         dest="local_install",
-        help="Uninstall from ./.claude/skills/ddd/",
+        help="Uninstall from ./.claude/skills/",
     )
 
     return parser

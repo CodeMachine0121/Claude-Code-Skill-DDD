@@ -13,10 +13,10 @@
 # 互動式選擇（會提示選擇全域或本地）
 uvx --from Claude-Code-Skill-DDD ddd-skill install
 
-# 安裝到全域 (~/.claude/skills/ddd/)，所有專案皆可使用
+# 安裝到全域 (~/.claude/skills/)，所有專案皆可使用
 uvx --from Claude-Code-Skill-DDD ddd-skill install -g
 
-# 安裝到當前專案 (./.claude/skills/ddd/)，僅限此專案使用
+# 安裝到當前專案 (./.claude/skills/)，僅限此專案使用
 uvx --from Claude-Code-Skill-DDD ddd-skill install -l
 ```
 
