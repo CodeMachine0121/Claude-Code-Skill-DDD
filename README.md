@@ -35,12 +35,16 @@ uvx --from Claude-Code-Skill-DDD ddd-skill uninstall -l
 
 ## 使用方式
 
-安裝後，在 Claude Code 中可以使用以下兩個 skills：
+安裝後，在 Claude Code 中直接用自然語言描述您的需求，Claude 會自動識別並啟用相應的 skill：
 
 ### DDD 戰略設計
 
+直接告訴 Claude 您想進行 DDD 設計，例如：
+
 ```
-/strategic-design
+幫我做 DDD 戰略設計
+我想要進行領域驅動設計
+幫我設計系統的 Bounded Context
 ```
 
 引導流程：
@@ -52,8 +56,12 @@ uvx --from Claude-Code-Skill-DDD ddd-skill uninstall -l
 
 ### Event Storming 工作坊
 
+直接告訴 Claude 您想進行 Event Storming，例如：
+
 ```
-/event-storming
+帶我做 Event Storming
+我想進行事件風暴工作坊
+幫我用 Event Storming 分析業務流程
 ```
 
 引導流程：
