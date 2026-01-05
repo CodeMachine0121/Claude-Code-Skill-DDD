@@ -69,8 +69,10 @@ description: DDD 戰略設計專家，引導使用者完成 Bounded Context 識�
 | {Context1} | {職責描述} | Core/Supporting/Generic |
 
 ### Context 之間的關係
-```
-[Context A] --<關係>--> [Context B]
+
+```mermaid
+graph LR
+    A[Context A] -->|關係| B[Context B]
 ```
 
 ### 待確認事項
@@ -93,6 +95,18 @@ description: DDD 戰略設計專家，引導使用者完成 Bounded Context 識�
 ## Phase 3 完成：Aggregate 設計
 
 ### 各 Context 的 Aggregates
+
+\`\`\`mermaid
+graph TD
+    subgraph Context1
+        A1[Aggregate1]
+        A2[Aggregate2]
+    end
+    subgraph Context2
+        A3[Aggregate3]
+    end
+\`\`\`
+
 #### {Context 1}
 | Aggregate | 職責 | 業務規則 |
 |-----------|------|----------|
@@ -121,6 +135,25 @@ description: DDD 戰略設計專家，引導使用者完成 Bounded Context 識�
 ## Phase 4 完成：Entity / Value Object 細節
 
 ### Aggregate: {Aggregate 名稱}
+
+\`\`\`mermaid
+classDiagram
+    class AggregateRoot {
+        +identifier
+        +property1
+        +property2
+    }
+    class ValueObject1 {
+        +field1
+        +field2
+    }
+    class Entity1 {
+        +id
+        +field1
+    }
+    AggregateRoot *-- ValueObject1
+    AggregateRoot *-- Entity1
+\`\`\`
 
 #### 聚合根 Entity
 - **名稱**：{Entity 名稱}

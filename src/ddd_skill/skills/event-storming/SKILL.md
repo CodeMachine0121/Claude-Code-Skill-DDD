@@ -103,6 +103,14 @@ description: Event Storming 引導專家，透過 Plan Mode 問答帶領使用�
 ## Phase 3 完成：事件時間線
 
 ### 主要流程時間線
+
+\`\`\`mermaid
+graph LR
+    E1[Event1] --> E2[Event2]
+    E2 --> E3[Event3]
+    E3 --> E4[Event4]
+\`\`\`
+
 1. {Event1}
 2. {Event2}
 3. {Event3}
@@ -131,6 +139,16 @@ description: Event Storming 引導專家，透過 Plan Mode 問答帶領使用�
 ## Phase 4 完成：Commands & Actors 識別
 
 ### 事件觸發關係
+
+\`\`\`mermaid
+graph LR
+    Actor1[Actor1] -->|Command1| Agg1[Aggregate]
+    Agg1 -->|Event1| E1((Event1))
+    E1 -->|Policy1| C2[Command2]
+    C2 --> Agg2[Aggregate]
+    Agg2 -->|Event2| E2((Event2))
+\`\`\`
+
 | Domain Event | Command | Actor/Policy |
 |--------------|---------|--------------|
 | {Event1} | {Command1} | {Actor1} |
@@ -270,8 +288,10 @@ ddd-docs/
 
 ### 主要流程
 
-```
-[Actor] --> (Command) --> [Aggregate] --> <<Event>>
+```mermaid
+graph LR
+    A[Actor] -->|Command| B[Aggregate]
+    B -->|Domain Event| C((Event))
 ```
 
 | 順序 | Actor | Command | Aggregate | Domain Event | 備註 |
